@@ -1,0 +1,168 @@
+<div class="container">
+    @if (isLoading()) {
+        <div class="spinner-container">
+            <mat-spinner diameter="350" strokeWidth="15"></mat-spinner>
+        </div>
+    } @else {
+        <div class="profile-container">
+            @if (profile(); as u) {
+                <mat-card appearance="outlined">
+                    <mat-card-header class="profile-header" style="background-image: url('{{u.bannerUrl}}');">
+                        <div class="pfp-container">
+                            <img [src]="u.pfpUrl" class="pfp"/>
+                            @if (isOwnProfile()) {
+                                <div class="pfp-upload-container">
+                                    @if (pfpUploadLoading()) {
+                                        <mat-spinner diameter="24"></mat-spinner>
+                                    } @else {
+                                        <button matIconButton (click)="triggerUpload(pfpInput)" title="Upload Profile Picture" class="pfp-upload-button">
+                                            <mat-icon>upload</mat-icon>
+                                        </button>
+                                        <input
+                                            type="file"
+                                            #pfpInput
+                                            (change)="uploadPfp($event)"
+                                            accept="image/jpeg, image/png, image/gif"
+                                            style="display: none;" />
+                                    }
+                                </div>
+                            }
+                        </div>
+                        <div class="username-container">
+                            @switch (usernameState()) {
+                                @case ('display') {
+                                    <h1 class="username">{{u.username}}</h1>
+                                    @if (isOwnProfile()) {
+                                        <button matIconButton class="username-edit" (click)="enableEditUsername()">
+                                            <mat-icon>edit</mat-icon>
+                                        </button>
+                                    }
+                                }
+                                @case ('edit') {
+                                    <input
+                                        #usernameRef
+                                        type="text"
+                                        [value]="usernameValue()"
+                                        class="username-input"
+                                        (input)="usernameValue.set(usernameRef.value)"
+                                        placeholder="Enter new username" />
+                                    <div class="username-buttons">
+                                        <button matIconButton class="username-save" (click)="saveUsername()">
+                                            <mat-icon>save</mat-icon>
+                                        </button>
+                                        <button matIconButton class="username-cancel" (click)="usernameState.set('display')">
+                                            <mat-icon>cancel</mat-icon>
+                                        </button>
+                                    </div>
+                                }
+                                @case ('loading') {
+                                    <mat-spinner diameter="36" strokeWidth="3" class="username-spinner"></mat-spinner>
+                                }
+                            }
+
+                        </div>
+                        @if (isOwnProfile()) {
+                            <div class="banner-upload">
+                                @if (bannerUploadLoading()) {
+                                    <mat-spinner diameter="24"></mat-spinner>
+                                } @else {
+                                    <button matIconButton (click)="triggerUpload(bannerInput)" title="Upload Banner" class="banner-upload-button">
+                                        <mat-icon>upload</mat-icon>
+                                    </button>
+                                    <input
+                                        type="file"
+                                        #bannerInput
+                                        (change)="uploadBanner($event)"
+                                        accept="image/jpeg, image/png, image/gif"
+                                        style="display: none;" />
+                                }
+                            </div>
+                        }
+
+                    </mat-card-header>
+                    <mat-card-content class="content">
+                        <div class="bio-container">
+                            @switch (bioState()) {
+                                @case ('display') {
+                                    <mat-card-title class="bio-title">
+                                    @if (isOwnProfile()) {
+                                        <button matIconButton class="bio-edit" (click)="enableEditBio()">
+                                            <mat-icon>edit</mat-icon>
+                                        </button>
+                                    }
+                                        <h1 class="bio-title-header">About:</h1>
+                                    </mat-card-title>
+                                    <p class="bio-text">{{u.bio}}</p>
+                                }
+                                @case ('edit') {
+                                    <textarea
+                                        #bioRef
+                                        class="bio-input"
+                                        [value]="bioValue()"
+                                        (input)="bioValue.set(bioRef.value)"
+                                        placeholder="Enter your bio"></textarea>
+                                    <div class="bio-buttons">
+                                        <button matIconButton class="bio-save" (click)="saveBio()">
+                                            <mat-icon>save</mat-icon>
+                                        </button>
+                                        <button matIconButton class="bio-cancel" (click)="bioState.set('display')">
+                                            <mat-icon>cancel</mat-icon>
+                                        </button>
+                                    </div>
+                                }
+                                @case ('loading') {
+                                    <mat-spinner diameter="36" strokeWidth="3" class="bio-spinner"></mat-spinner>
+                                }
+                            }
+                        </div>
+                        <div class="website-container">
+                            @switch (websiteState()) {
+                                @case ('display') {
+                                    <mat-card-title class="website-title">
+                                        @if (isOwnProfile()) {
+                                            <button matIconButton class="website-edit" (click)="enableEditWebsite()">
+                                                <mat-icon>edit</mat-icon>
+                                            </button>
+                                        }
+                                        <h1 class="website-title-header">Website:</h1>
+                                    </mat-card-title>
+                                    <p class="website-text">
+                                        @if (u.website) {
+                                            <a [href]="u.website" target="_blank">{{u.website}}</a>
+                                        } @else {
+                                            No website set.
+                                        }
+                                    </p>
+                                }
+                                @case ('edit') {
+                                    <input
+                                        #websiteRef
+                                        type="text"
+                                        [value]="websiteValue()"
+                                        class="website-input"
+                                        (input)="websiteValue.set(websiteRef.value)"
+                                        placeholder="Enter your website" />
+                                    <div class="website-buttons">
+                                        <button matIconButton class="website-save" (click)="saveWebsite()">
+                                            <mat-icon>save</mat-icon>
+                                        </button>
+                                        <button matIconButton class="website-cancel" (click)="websiteState.set('display')">
+                                            <mat-icon>cancel</mat-icon>
+                                        </button>
+                                    </div>
+                                }
+                                @case ('loading') {
+                                    <mat-spinner diameter="36" strokeWidth="3" class="website-spinner"></mat-spinner>
+                                }
+                            }
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+            } @else {
+                <div class="no-profile">
+                    <h1>Profile not found</h1>
+                </div>
+            }
+        </div>
+    }
+</div>

@@ -1,0 +1,20 @@
+<div class="container">
+    @if (isLoading()) {
+        <mat-spinner diameter="32"></mat-spinner>
+    } @else {
+        @if (user(); as u) {
+            <button matIconButton [matMenuTriggerFor]="menu"><img [src]="u.pfpUrl" class="pfp"/></button>
+            <mat-menu #menu="matMenu">
+                <a [routerLink]="['/profile', u.walletAddress]"><p class="username">{{u.username}}</p></a>
+                <a [routerLink]="['dashboard']"><button matButton>Dashboard</button></a>
+                <mat-divider></mat-divider>
+                <button matButton (click)="logout()">Logout</button>
+            </mat-menu>
+        } @else {
+            <button matButton extended (click)="login()">
+                <mat-icon>wallet</mat-icon>
+                Link Wallet
+            </button>
+        }
+    }
+</div>
