@@ -18,7 +18,7 @@ export class AuthService {
     private userSubject = new BehaviorSubject<any>(null);
     public user$ = this.userSubject.asObservable();
 
-    private protectedRoutes = ['/dashboard'];
+    private guardedRoute: string[] = [];
     private currentRoute = '';
 
     constructor(
@@ -122,12 +122,12 @@ export class AuthService {
     }
 
     logout() {
-        const isOnprotectedRoute = this.protectedRoutes.some(route => this.currentRoute.startsWith(route));
+        const isOnGuardedRoute = this.guardedRoute.some(route => this.currentRoute.startsWith(route));
 
         this.userSubject.next(null);
         this.tokenService.clearToken();
 
-        if (isOnprotectedRoute) {
+        if (isOnGuardedRoute) {
             this.router.navigate(['/']);
         }
     }
@@ -138,5 +138,11 @@ export class AuthService {
 
     updateUser(user: User): void {
         this.userSubject.next(user);
+    }
+
+    addGaurdedRoute(route: string): void {
+        if (!this.guardedRoute.some(i => i === route)) {
+            this.guardedRoute.push(route);
+        }
     }
 }
