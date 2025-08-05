@@ -12,27 +12,27 @@ namespace MarketApi.Services
             _config = config;
         }
 
-        public User GetUserResponse(User entity)
+        public User GetUserResponse(User user)
         {
-            if (entity == null)
+            if (user == null)
             {
-                throw new ArgumentNullException(nameof(entity));
+                throw new ArgumentNullException(nameof(user));
             }
 
             var cdnBaseUrl = _config.GetValue<string>("CdnBaseUrl") ?? "";
-            var fullPfpUrl = $"{cdnBaseUrl.TrimEnd('/')}/{entity.PfpUrl.TrimStart('/')}";
-            var fullBannerUrl = $"{cdnBaseUrl.TrimEnd('/')}/{entity.BannerUrl.TrimStart('/')}";
+            var fullPfpUrl = $"{cdnBaseUrl.TrimEnd('/')}/{user.PfpUrl.TrimStart('/')}";
+            var fullBannerUrl = $"{cdnBaseUrl.TrimEnd('/')}/{user.BannerUrl.TrimStart('/')}";
 
             return new User
             {
-                WalletAddress = entity.WalletAddress,
-                Username = entity.Username,
+                WalletAddress = user.WalletAddress,
+                Username = user.Username,
                 PfpUrl = fullPfpUrl,
                 BannerUrl = fullBannerUrl,
-                Bio = entity.Bio,
-                Website = entity.Website,
-                AdultContentEnabled = entity.AdultContentEnabled,
-                Joined = entity.Joined,
+                Bio = user.Bio,
+                Website = user.Website,
+                AdultContentEnabled = user.AdultContentEnabled,
+                Joined = user.Joined,
             };
         }
     }

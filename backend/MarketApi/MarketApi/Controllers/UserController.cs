@@ -21,7 +21,6 @@ namespace MarketApi.Controllers
         private readonly IConfiguration _config;
         private readonly IUserService _userService;
         private readonly IFileStorageService _fileStorageService;
-        private readonly IWebHostEnvironment _environment;
 
         public UserController(AppDbContext context, IConfiguration configuration, IUserService userService, IFileStorageService fileStorage, IWebHostEnvironment environment)
         {
@@ -29,7 +28,6 @@ namespace MarketApi.Controllers
             _config = configuration;
             _userService = userService;
             _fileStorageService = fileStorage;
-            _environment = environment;
         }
 
         [HttpGet("get/{walletAddress}")]

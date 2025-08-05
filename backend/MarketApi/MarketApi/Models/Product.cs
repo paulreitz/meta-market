@@ -14,7 +14,7 @@ namespace MarketApi.Models
         public string UserWalletAddress { get; set; }
         [ForeignKey("UserWalletAddress")]
         public User User { get; set; }
-        public string FilePath { get; set; } = string.Empty;
+        public List<ProductFile> Files { get; set; } = new List<ProductFile>();
         public decimal Price { get; set; }
         public Currency Currency { get; set; } = Currency.ETH;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

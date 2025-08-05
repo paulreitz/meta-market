@@ -8,3 +8,8 @@
 * Backend: Setup a service for storing files
 * Backend: Added pfp and banner uploading to the File Storage Service
 * Backend: Refactored the User controller to use the File Storage Service for pfp and banner images.
+
+## 8/5/2025
+* Backend: Refactor product model
+* Backend: Separate product file information into its own model
+* Backend: Created the product service.

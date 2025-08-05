@@ -4,6 +4,6 @@ namespace MarketApi.Services
 {
     public interface IUserService
     {
-        User GetUserResponse(User entity);
+        User GetUserResponse(User user);
     }
 }
