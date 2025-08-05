@@ -6,6 +6,7 @@ using System.Text;
 using Microsoft.OpenApi.Models;
 using MarketApi.Models;
 using MarketApi.Services;
+using MarketApi.Providers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +19,19 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IFileStorageService, FileStorageService>();
+builder.Services.AddSingleton<IStorageProvider>(sp =>
+{
+    var config = sp.GetRequiredService<IConfiguration>();
+    if (builder.Environment.IsDevelopment())
+    {
+        return new LocalFileStorageProvider(config);
+    }
+    else
+    {
+        return new CloudStorageProvider(config);
+    }
+});
 
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 

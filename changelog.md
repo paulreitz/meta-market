@@ -4,3 +4,7 @@
 * FrontEnd: Set up a global store for the project using NgRX
 * FrontEnd: Create a global store for supported currencies
 * FrontEnd: Load supported currencies from the back end on app startup. (Currently only Ethereum is supported). 
+* Backend: Setup a provider for storing files
+* Backend: Setup a service for storing files
+* Backend: Added pfp and banner uploading to the File Storage Service
+* Backend: Refactored the User controller to use the File Storage Service for pfp and banner images.

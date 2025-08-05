@@ -4,3 +4,7 @@ obj/
 .vs/
 *.log
 wwwroot/cdn/images/users
+
+Uploads/
+!Uploads/images/defaults/
+!Uploads/images/defaults/*

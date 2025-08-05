@@ -20,13 +20,15 @@ namespace MarketApi.Controllers
         private readonly AppDbContext _context;
         private readonly IConfiguration _config;
         private readonly IUserService _userService;
+        private readonly IFileStorageService _fileStorageService;
         private readonly IWebHostEnvironment _environment;
 
-        public UserController(AppDbContext context, IConfiguration configuration, IUserService userService, IWebHostEnvironment environment)
+        public UserController(AppDbContext context, IConfiguration configuration, IUserService userService, IFileStorageService fileStorage, IWebHostEnvironment environment)
         {
             _context = context;
             _config = configuration;
             _userService = userService;
+            _fileStorageService = fileStorage;
             _environment = environment;
         }
 
@@ -146,50 +148,26 @@ namespace MarketApi.Controllers
                 return NotFound("user not found.");
             }
 
-            if (file == null || file.Length == 0)
+            try
             {
-                return BadRequest("No file uploaded.");
-            }
+                string? oldBannerPath = !string.IsNullOrEmpty(user.BannerUrl) && user.BannerUrl.StartsWith("/images/users/")
+                    ? user.BannerUrl.TrimStart('/')
+                    : null;
 
-            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
-            var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-            if (!allowedExtensions.Contains(extension))
+                var newBannerPath = await _fileStorageService.SetBannerAsync(walletAddress, file, oldBannerPath);
+
+                user.BannerUrl = newBannerPath;
+                await _context.SaveChangesAsync();
+                return Ok(_userService.GetUserResponse(user));
+            }
+            catch (ArgumentException ex)
             {
-                return BadRequest("Invalid file type. Only JPG, JPEG, PNG, and GIF are allowed.");
+                return BadRequest(ex.Message);
             }
-
-            if (file.Length > 5 * 1024 * 1024)
+            catch (Exception ex)
             {
-                return BadRequest("File too large, Max 5MB");
+                return StatusCode(500, "An error occurred while updating the banner.");
             }
-
-            var userFolder = Path.Combine(_environment.WebRootPath, "cdn", "images", "users", walletAddress); // GOOD GAWD, fix this for deployment!!!
-            if (!Directory.Exists(userFolder))
-            {
-                Directory.CreateDirectory(userFolder);
-            }
-
-            if (!string.IsNullOrEmpty(user.BannerUrl) && user.BannerUrl.StartsWith("/images/users"))
-            {
-                var oldRelativePath = user.BannerUrl.TrimStart('/');
-                var oldFilePath = Path.Combine(_environment.WebRootPath, "cdn", oldRelativePath);
-                if (System.IO.File.Exists(oldFilePath))
-                {
-                    System.IO.File.Delete(oldFilePath);
-                }
-            }
-
-            var cacheBust = Guid.NewGuid().ToString("N").Substring(0, 8);
-            var filePath = Path.Combine(userFolder, $"banner{cacheBust}{extension}");
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await file.CopyToAsync(stream);
-            }
-
-            user.BannerUrl = $"/images/users/{walletAddress}/banner{cacheBust}{extension}";
-            await _context.SaveChangesAsync();
-
-            return Ok(_userService.GetUserResponse(user));
         }
 
         [HttpPost("pfp")]
@@ -208,50 +186,26 @@ namespace MarketApi.Controllers
                 return NotFound("user not found.");
             }
 
-            if (file == null ||file.Length == 0)
+            try
             {
-                return BadRequest("No file uploaded.");
-            }
+                string? oldPfpPath = !string.IsNullOrEmpty(user.PfpUrl) && user.PfpUrl.StartsWith("/images/users/")
+                    ? user.PfpUrl.TrimStart('/')
+                    : null;
 
-            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
-            var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
-            if (!allowedExtensions.Contains(extension))
+                var newPfpPath = await _fileStorageService.SetPfpAsync(walletAddress, file, oldPfpPath);
+
+                user.PfpUrl = newPfpPath;
+                await _context.SaveChangesAsync();
+                return Ok(_userService.GetUserResponse(user));
+            }
+            catch (ArgumentException ex)
             {
-                return BadRequest("Invalid file type. Only JPG, JPEG, PNG, and GIF are allowed.");
+                return BadRequest(ex.Message);
             }
-            if (file.Length > 5 * 1024 * 1024)
+            catch (Exception ex)
             {
-                return BadRequest("File too large, Max 5MB");
+                return StatusCode(500, "An error occurred while updating the profile picture.");
             }
-
-            var userFilder = Path.Combine(_environment.WebRootPath, "cdn", "images", "users", walletAddress); // GOOD GAWD, fix this for deployment!!!
-            if (!Directory.Exists(userFilder))
-            {
-                Directory.CreateDirectory(userFilder);
-            }
-
-            if (!string.IsNullOrEmpty(user.PfpUrl) && user.PfpUrl.StartsWith("/images/users/"))
-            {
-                var oldRelativePath = user.PfpUrl.TrimStart('/');
-                var oldFilePath = Path.Combine(_environment.WebRootPath, "cdn", oldRelativePath);
-                if (System.IO.File.Exists(oldFilePath))
-                {
-                    System.IO.File.Delete(oldFilePath);
-                }
-            }
-
-            var cacheBust = Guid.NewGuid().ToString("N").Substring(0, 8);
-
-            var filePath = Path.Combine(userFilder, $"pfp{cacheBust}{extension}");
-            using (var stream = new FileStream(filePath, FileMode.Create))
-            {
-                await file.CopyToAsync(stream);
-            }
-
-            user.PfpUrl = $"/images/users/{walletAddress}/pfp{cacheBust}{extension}";
-            await _context.SaveChangesAsync();
-
-            return Ok(_userService.GetUserResponse(user));
         }
     }
 
