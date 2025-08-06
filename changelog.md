@@ -10,6 +10,12 @@
 * Backend: Refactored the User controller to use the File Storage Service for pfp and banner images.
 
 ## 8/5/2025
+
 * Backend: Refactor product model
 * Backend: Separate product file information into its own model
 * Backend: Created the product service.
+
+## 8/6/2025
+
+* Created endpoint and service methods for creating a new product
+* Created endpoint for fetching a product by ID

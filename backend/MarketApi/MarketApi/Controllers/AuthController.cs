@@ -93,7 +93,7 @@ namespace MarketApi.Controllers
             user.NonceExpiration = null;
             await _context.SaveChangesAsync();
 
-            var key = Encoding.ASCII.GetBytes(_config.GetValue<string>("TokenKey")); // Can I get a null check, yo yo!
+            var key = Encoding.ASCII.GetBytes(_config.GetValue<string>("TokenKey"));
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(new[]

@@ -8,11 +8,53 @@ namespace MarketApi.Services
 {
     public class ProductService : IProductService
     {
+        private readonly AppDbContext _context;
         private readonly IConfiguration _config;
+        private readonly IFileStorageService _fileStorageService;
 
-        public ProductService(IConfiguration config)
+        public ProductService(AppDbContext context, IConfiguration config, IFileStorageService fileStorageService)
         {
-            _config = config;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _config = config ?? throw new ArgumentNullException(nameof(config));
+            _fileStorageService = fileStorageService ?? throw new ArgumentNullException(nameof(fileStorageService));
+        }
+
+        public async Task<Product> CreateProductAsync(CreateProductRequest request, string walletAddress)
+        {
+            var user = await _context.Users.FindAsync(walletAddress.ToLower());
+            if (user == null)
+            {
+                throw new ArgumentException("User not found.");
+            }
+
+            var product = new Product
+            {
+                Name = request.Name,
+                Description = request.Description,
+                Price = request.Price,
+                Currency = request.Currency,
+                UserWalletAddress = walletAddress,
+                User = user,
+                CreatedAt = DateTime.UtcNow,
+                Images = new List<string>(),
+                Files = new List<ProductFile>()
+            };
+
+            _context.Products.Add(product);
+            await _context.SaveChangesAsync();
+
+            if (request.Images.Any())
+            {
+                product.Images = await _fileStorageService.SaveProductImagesAsync(product.Id, request.Images);
+            }
+
+            if (request.Files.Any())
+            {
+                product.Files = await _fileStorageService.SaveProductFilesAsync(product.Id, request.Files);
+            }
+
+            await _context.SaveChangesAsync();
+            return product;
         }
 
         public Product GetProductResponse(Product product)
@@ -37,7 +79,7 @@ namespace MarketApi.Services
                 Description = product.Description,
                 Images = fullImageUrls,
                 UserWalletAddress = product.UserWalletAddress,
-                User = product.User, // Include user for now to link to profile and/or products page.
+                User = product.User, // Include for now, but consider a watered down version with only necessary fields
                 Files = fileResponses,
                 Price = product.Price,
                 Currency = product.Currency,
